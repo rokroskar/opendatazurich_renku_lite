@@ -25,7 +25,7 @@ INTRO = """\
 # OpenDataZurich starter notebook
 
 This notebook runs **entirely in your browser** (JupyterLite with a Pyodide Python kernel): \
-pandas, matplotlib, seaborn, missingno and the OpenDataZurich helper are preloaded \
+pandas, matplotlib, seaborn and the OpenDataZurich helper are preloaded \
 when the kernel starts, and your changes are stored only in this browser. \
 Run the cells from top to bottom with <kbd>Shift</kbd>+<kbd>Enter</kbd>, \
 or use *Run → Run All Cells*."""

@@ -1,6 +1,5 @@
 # Pure-Python packages not in the Pyodide distribution, served from the site
 # via piplite (no PyPI round-trip from the browser).
-missingno==0.5.2
 seaborn==0.13.2
 # installed by the Pyodide kernel itself at startup
 comm==0.2.3

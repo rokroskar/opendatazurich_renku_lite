@@ -12,8 +12,7 @@
             "matplotlib",
             "scipy",
             "/pypi/opendata_lite-1.0.0-py3-none-any.whl",
-            "/pypi/seaborn-0.13.2-py3-none-any.whl",
-            "/pypi/missingno-0.5.2-py3-none-any.whl"
+            "/pypi/seaborn-0.13.2-py3-none-any.whl"
           ]
         }
       }
