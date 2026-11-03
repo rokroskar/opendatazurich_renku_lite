@@ -31,7 +31,7 @@ If the visitor already has that notebook, their edited copy is reopened instead.
 | `nginx/templates/` | nginx config: static site on port 8080, `/healthz`, `/proxy/` |
 | `Dockerfile` | Stage 1 runs `jupyter lite build`; stage 2 serves the result with non-root `nginx-unprivileged:alpine` on **8080** |
 
-Runtime: the kernel is Pyodide 314.0.6 (from `jupyterlite-pyodide-kernel` 0.8.6), with Python 3.14, pandas 3.0, pyarrow 22, geopandas 1.1 and matplotlib 3.10. Pyodide itself loads from the jsDelivr CDN. pandas, pyarrow, matplotlib, scipy, seaborn, missingno and `opendata_lite` are preloaded when the kernel starts (`loadPyodideOptions.packages` in `jupyter-lite.json`), so notebooks need no install cell. geopandas loads on first use. The wheels that are not part of Pyodide are served from the site (`/pypi/`), so the browser never contacts PyPI. When you bump a wheel version, update its file name in `jupyter-lite.json` too; `tests/test_proxy.sh` checks that every preloaded wheel exists.
+Runtime: the kernel is Pyodide 314.0.6 (from `jupyterlite-pyodide-kernel` 0.8.6), with Python 3.14, pandas 3.0, pyarrow 22, geopandas 1.1 and matplotlib 3.10. Pyodide (runtime + distribution packages) is bundled into the image at build time and served same-origin from `static/pyodide/`, so the browser never contacts a public CDN. The version is pinned in the `Dockerfile` via the `PYODIDE_VERSION` build arg; it must match `jupyterlite_pyodide_kernel.constants.PYODIDE_VERSION` or `jupyter lite build` will refuse the tarball. pandas, pyarrow, matplotlib, scipy, seaborn, missingno and `opendata_lite` are preloaded when the kernel starts (`loadPyodideOptions.packages` in `jupyter-lite.json`), so notebooks need no install cell. geopandas loads on first use. The pure-Python wheels that are not part of Pyodide are served from the site (`/pypi/`), so the browser never contacts PyPI either. When you bump a wheel version, update its file name in `jupyter-lite.json` too; `tests/test_proxy.sh` checks that every preloaded wheel exists.
 
 ## Development
 
@@ -50,7 +50,9 @@ To pick up upstream template changes, run `uv run python scripts/port_templates.
 
 ## Deploying as a Renku app
 
-Deploy the image `ghcr.io/rokroskar/opendatazurich_renku_lite:<tag>`, built by `.github/workflows/build.yaml`. The container listens on port **8080**, needs no environment variables or volumes, and serves `/healthz` for probes. It is stateless, so any number of Knative replicas works without session affinity. The site expects to be served at the root of its host.
+Deploy the image `ghcr.io/rokroskar/opendatazurich_renku_lite:<tag>` (upstream) or `ghcr.io/opendatazurich/opendatazurich_renku_lite:<tag>` (this fork), built by `.github/workflows/build.yaml`. The container listens on port **8080**, needs no environment variables or volumes, and serves `/healthz` for probes. It is stateless, so any number of Knative replicas works without session affinity. The site expects to be served at the root of its host.
+
+Because Pyodide is bundled, the image is larger (~600 MB) than a plain JupyterLite deploy, but the runtime has no outbound dependency on a public CDN — only `data.stadt-zuerich.ch` and `www.ogd.stadt-zuerich.ch` are contacted from the browser. This makes the app usable from networks whose web proxy strips CORS headers on third-party CDN responses (TLS interception). See [docs/pyodide-same-origin.md](docs/pyodide-same-origin.md) for the full design and — importantly — the Renku launcher settings (`UID/GID 101`, `Default URL /lab`, mount/working directories) that must match the non-root nginx base image.
 
 ## CORS and the download proxy
 
