@@ -56,10 +56,5 @@ RUN sed -i -E 's#((application|text)/javascript[[:space:]]+)js;#\1js mjs;#' /etc
 COPY nginx/templates/ /etc/nginx/templates/
 COPY --from=build /site /usr/share/nginx/html
 
-# Marker file to verify at runtime that this image (and not a stale cached one)
-# is the one actually running behind the Renku launcher. Harmless to ship.
-# Must run before `USER 101` because /usr/share/nginx/html is root-owned.
-RUN echo "mjs-mime-fix-active" > /usr/share/nginx/html/_build_marker.txt
-
 USER 101
 EXPOSE 8080

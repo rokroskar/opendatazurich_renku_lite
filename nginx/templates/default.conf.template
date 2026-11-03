@@ -30,14 +30,6 @@ server {
         add_header Cache-Control "no-cache";
     }
 
-    # nginx-alpine's mime.types has no mapping for .mjs, so the ES-module entry
-    # pyodide.mjs would be served as application/octet-stream and the browser
-    # would refuse to load it as a module (strict MIME checking for modules).
-    location ~ \.mjs$ {
-        default_type text/javascript;
-        add_header Cache-Control "public, max-age=3600";
-    }
-
     location = /healthz {
         access_log off;
         default_type text/plain;
