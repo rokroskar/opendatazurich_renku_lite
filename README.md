@@ -50,9 +50,9 @@ To pick up upstream template changes, run `uv run python scripts/port_templates.
 
 ## Deploying as a Renku app
 
-Deploy the image `ghcr.io/rokroskar/opendatazurich_renku_lite:<tag>`, built by `.github/workflows/build.yaml`. The container listens on port **8080**, needs no environment variables or volumes, and serves `/healthz` for probes. It is stateless, so any number of Knative replicas works without session affinity. The site expects to be served at the root of its host.
+Deploy the image `ghcr.io/rokroskar/opendatazurich_renku_lite:<tag>` (upstream) or `ghcr.io/opendatazurich/opendatazurich_renku_lite:<tag>` (this fork), built by `.github/workflows/build.yaml`. The container listens on port **8080**, needs no environment variables or volumes, and serves `/healthz` for probes. It is stateless, so any number of Knative replicas works without session affinity. The site expects to be served at the root of its host.
 
-Because Pyodide is bundled, the image is larger (~several hundred MB) than a plain JupyterLite deploy, but the runtime has no outbound dependency on a public CDN — only `data.stadt-zuerich.ch` and `www.ogd.stadt-zuerich.ch` are contacted from the browser. This makes the app usable from networks whose web proxy strips CORS headers on third-party CDN responses (TLS interception).
+Because Pyodide is bundled, the image is larger (~600 MB) than a plain JupyterLite deploy, but the runtime has no outbound dependency on a public CDN — only `data.stadt-zuerich.ch` and `www.ogd.stadt-zuerich.ch` are contacted from the browser. This makes the app usable from networks whose web proxy strips CORS headers on third-party CDN responses (TLS interception). See [docs/pyodide-same-origin.md](docs/pyodide-same-origin.md) for the full design and — importantly — the Renku launcher settings (`UID/GID 101`, `Default URL /lab`, mount/working directories) that must match the non-root nginx base image.
 
 ## CORS and the download proxy
 
