@@ -24,6 +24,10 @@ const TEMPLATES = {
 };
 const PACKAGE_ID = /^[a-z0-9_-]{1,200}$/;
 const RESOURCE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Session launchers for the opendatazurich/starter-code Renku project.
+// Update these if the launchers are recreated on renkulab.io.
+const RENKU_PYTHON_SESSION = '01KC1K2SN2GAQSGJ3NY602EA95';
+const RENKU_R_SESSION = '01K7HKDF1S55RHSZPCK4SHTX1H';
 
 interface ILaunchParams {
   packageId: string;
@@ -75,6 +79,26 @@ export function parametersSource({ packageId, resourceId }: ILaunchParams): stri
   ].join('\n');
 }
 
+/** Markdown source for the closing "Need more power?" cell with pre-filled session links. */
+export function renkuLinksSource({ packageId, resourceId }: ILaunchParams): string {
+  const qs = new URLSearchParams({ PACKAGE_ID: packageId });
+  if (resourceId !== null) {
+    qs.set('RESOURCE_ID', resourceId);
+  }
+  const pyUrl = `https://renkulab.io/p/opendatazurich/starter-code/sessions/${RENKU_PYTHON_SESSION}/start?${qs}`;
+  const rUrl = `https://renkulab.io/p/opendatazurich/starter-code/sessions/${RENKU_R_SESSION}/start?${qs}`;
+  return [
+    '## Need more power, or R?',
+    '',
+    'This in-browser kernel is limited to the memory of your browser tab (a few GB at most) and cannot install packages with compiled code that are not part of Pyodide. For large datasets, other Python packages or for working in R, open this dataset in a full Renku session:',
+    '',
+    `* [Open in Renku (Python)](${pyUrl})`,
+    `* [Open in Renku (R)](${rUrl})`,
+    '',
+    'Use *File → Download* to keep a copy of this notebook.'
+  ].join('\n');
+}
+
 function notebookPath({ packageId, resourceId }: ILaunchParams): string {
   const suffix = resourceId === null ? '' : `--${resourceId.slice(0, 8)}`;
   return `OpenData-${packageId}${suffix}.ipynb`;
@@ -116,6 +140,11 @@ async function createNotebook(
     throw new Error(`${template} has no cell tagged "parameters".`);
   }
   cell.source = parametersSource(params);
+  const renkuLinksCell = notebook.cells.find((c: any) => c.id === 'lite-renku');
+  if (renkuLinksCell === undefined) {
+    throw new Error(`${template} has no cell with id "lite-renku".`);
+  }
+  renkuLinksCell.source = renkuLinksSource(params);
   await contents.save(path, { type: 'notebook', format: 'json', content: notebook });
 }
 
